@@ -1,0 +1,13 @@
+.DS_Store
+.agent-state/
+.env
+.env.local
+__pycache__/
+*.pyc
+artifacts/*
+docs/*
+
+# Agent runtime memory
+/memory/experience.local.md
+/memory/daily/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].md
+/memory/sessions/[0-9][0-9][0-9][0-9]-[0-9][0-9].md
