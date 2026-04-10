@@ -130,6 +130,7 @@ For `C` tasks:
 - If the operator configured multiple platforms, treat those packages as reusable publishing assets, not as proof that the user has completed multiple public-posting tasks
 - Treat the queue file as the handoff surface for later project-side reporting: default entries to `pending_submit`, let the operator fill public links and short English descriptions, and when asked to submit, use the current day's queue files and only act on entries whose `Public URL` is non-empty
 - Treat package creation as the default stopping point unless the user explicitly asks for publishing or submission
+- When the user explicitly asks to publish or push content to a social platform, load the `media-operator` skill (`skills/media-operator/SKILL.md`) and follow its workflow to fill the content into the target platform and save as draft. The `media-operator` skill uses `agent-browser` for browser automation — ensure it is installed (`npm install -g agent-browser`) before invoking
 
 For `D` tasks:
 - Produce an SOP, proof checklist, and validation plan

@@ -18,6 +18,16 @@
         "GET /api/v1/mcp/projects/:project_id/tasks",
         "GET /api/v1/mcp/projects/:project_id/event-stream"
       ]
+    },
+    {
+      "name": "media-operator",
+      "path": "skills/media-operator/SKILL.md",
+      "description": "Use agent-browser to help users publish content to social media platforms. Activate when the user needs to publish content, push articles, upload posts, or post to social platforms.",
+      "required_scopes": [],
+      "required_tools": [
+        "agent-browser",
+        "bash"
+      ]
     }
   ]
 }
