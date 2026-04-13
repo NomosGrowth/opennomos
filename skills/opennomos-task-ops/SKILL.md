@@ -1,6 +1,6 @@
 ---
 name: opennomos-task-ops
-description: Coordinate OpenNomos project-task workflows end to end. Use when the user wants to discover live OpenNomos tasks, classify them into full-auto or human-in-the-loop buckets, generate content packages for social or proof tasks, execute browser flows, and validate completion through event stream data.
+description: Coordinate OpenNomos project-task workflows end to end. Use when the user wants to discover live OpenNomos tasks, classify them into full-auto or human-in-the-loop buckets, prepare content packages, stage social publishing flows through `media-operator`, execute browser flows, and validate completion through event stream data.
 ---
 
 # OpenNomos Task Ops
@@ -10,6 +10,7 @@ Use this skill to run OpenNomos tasks with a repeatable workflow instead of hand
 Always pair this skill with:
 - `opennomos-agent-mcp` for live project, task, and event stream data (https://github.com/NomosGrowth/opennomos-mcp-skills)
 - `actionbook` for browser automation on project sites
+- `media-operator` for social publishing tasks that should be staged into the target platform UI instead of stopping at markdown only
 
 ## Browser Runtime Baseline
 
@@ -27,6 +28,7 @@ Collect the smallest set that can unblock the current task:
 - OpenNomos account credentials if browser login is required
 - Human checkpoint support for captcha, 2FA, email verification, or wallet signing
 - For content tasks, platform requirements from user input or `.env`, plus any required links, tags, screenshots, or mentions
+- For social publishing tasks, access to the user's logged-in browser session plus remote debugging when `media-operator` needs to attach
 - For ownership tasks, access to the relevant site, social account, or admin surface
 
 Do not store secrets inside the skill files. Resolve credentials in this order:
@@ -85,9 +87,9 @@ Put each task into one bucket:
 - `B: half-auto`
   - Automation can reach the checkpoint, but the user must complete one step
   - Examples: captcha, email code, wallet signature, 2FA
-- `C: user publishes, agent prepares`
-  - The user performs the real post or external submission
-  - Examples: X, Xiaohongshu, Discord, Telegram, form-based proof
+- `C: agent stages publish, user confirms final post`
+  - The agent prepares the content package, uses `media-operator` to fill the target platform, and stops at a draft or final human checkpoint
+  - Examples: X, Xiaohongshu, Discord, Telegram, form-based proof that still needs a human-owned session or final click
 - `D: user-owned surface`
   - The user controls the asset; the agent provides process support
   - Examples: SEO edits, sitemap submission, internal links, broken-link fixes, real invitations
@@ -115,7 +117,8 @@ For `B` tasks:
 - Resume immediately after the user confirms completion
 
 For `C` tasks:
-- Do not post from the user's social account unless the user explicitly asks
+- Treat publishable social/content tasks as `media-operator` work by default, not as markdown-only handoff
+- Do not auto-publish from the user's social account; `media-operator` must stop at draft saved or the last true human checkpoint
 - Produce a content package using the format in [templates.md](references/templates.md)
 - Read target platforms from `OPENNOMOS_CONTENT_PLATFORMS` when it is set; otherwise use the platforms explicitly requested by the user or implied by the task
 - Treat `OPENNOMOS_CONTENT_PLATFORMS` as a comma-separated list of platform ids that become draft filenames under `artifacts/content/YYYY-MM-DD/<project>/<platform>.md`
@@ -129,8 +132,10 @@ For `C` tasks:
 - If a platform requires images, include image guidance or a shot list in the package; do not claim the images already exist unless they were actually produced
 - If the operator configured multiple platforms, treat those packages as reusable publishing assets, not as proof that the user has completed multiple public-posting tasks
 - Treat the queue file as the handoff surface for later project-side reporting: default entries to `pending_submit`, let the operator fill public links and short English descriptions, and when asked to submit, use the current day's queue files and only act on entries whose `Public URL` is non-empty
-- Treat package creation as the default stopping point unless the user explicitly asks for publishing or submission
-- When the user explicitly asks to publish or push content to a social platform, load the `media-operator` skill (`skills/media-operator/SKILL.md`) and follow its workflow to fill the content into the target platform and save as draft. The `media-operator` skill uses `agent-browser` for browser automation — ensure it is installed (`npm install -g agent-browser`) before invoking
+- Treat package creation as an intermediate artifact for publishable tasks. After the package is ready, immediately load the `media-operator` skill (`skills/media-operator/SKILL.md`) and follow its workflow to fill the content into the target platform and save as draft
+- Use the content package as the source material that `media-operator` pastes into the target platform, while preserving platform-specific hooks, tags, links, and image notes
+- Follow the `media-operator` operating model: attach to the user's own logged-in browser session when possible, verify remote debugging first, and only fall back to a separate browser profile if the user explicitly approves it
+- If the required browser hand-off is unavailable, stop at that checkpoint and mark the task as blocked rather than silently downgrading it to "markdown prepared"
 
 For `D` tasks:
 - Produce an SOP, proof checklist, and validation plan
@@ -183,6 +188,7 @@ When preparing content:
 - if working in this repo and preparing the week's Monday pass, write a weekly outline first under `artifacts/content/weeks/YYYY-Www.md`
 - if working in this repo, prefer writing the package to `artifacts/content/YYYY-MM-DD/<project>/` instead of leaving it only in chat
 - if working in this repo, also prepare the project-local `queue.md` file with placeholder entries for later submission reporting
+- for publishable social tasks, treat the package as the input to `media-operator`, then report whether the draft was staged successfully or which human checkpoint blocked it
 
 When validating:
 - show exact dates or timestamps when relevant
