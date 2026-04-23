@@ -99,9 +99,9 @@ Use [prompts/opennomos-weekly-content.md](prompts/opennomos-weekly-content.md) a
 
 Recommended behavior:
 
-- Run it before the first daily content pass of the week.
+- Run it before the first daily content staging pass of the week.
 - Store the weekly outline at `artifacts/content/weeks/YYYY-Www.md`.
-- Let later daily runs read that weekly plan before generating project-level output.
+- Let later daily runs read that weekly plan before staging platform drafts through `media-operator`.
 
 ## Repository Layout
 

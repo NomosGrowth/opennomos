@@ -34,30 +34,21 @@ Human checkpoint:
 Proof needed:
 ```
 
-## Content Package
+## Publishing Draft Status
 
 ```text
 Platform:
 Angle:
 Required mentions or tags:
 Required link:
-
-Main draft:
-
-Alt draft 1:
-
-Alt draft 2:
-
-Suggested title or hook:
-
-Suggested tags:
-
-Suggested screenshots or images:
-
-Proof text for task submission:
+Target editor URL:
+Draft status:
+Human checkpoint:
+Required media:
+Proof text after public post:
 ```
 
-## Proof Package
+## Proof Record
 
 ```text
 Project:

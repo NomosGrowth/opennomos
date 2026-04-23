@@ -4,7 +4,7 @@
     {
       "name": "opennomos-task-ops",
       "path": "skills/opennomos-task-ops/SKILL.md",
-      "description": "Coordinate OpenNomos project-task workflows: discover live tasks, classify automation level, prepare content packages, run browser flows, and validate completion through event stream.",
+      "description": "Coordinate OpenNomos project-task workflows: discover live tasks, classify automation level, stage content drafts through media-operator, run browser flows, and validate completion through event stream.",
       "required_scopes": [
         "api_key",
         "account_credentials"

@@ -99,9 +99,9 @@ OPENNOMOS_ACCOUNT_PASSWORD=
 
 建议做法：
 
-- 在一周首次日常内容生成前执行。
+- 在一周首次日常内容草稿投放前执行。
 - 将周计划写入 `artifacts/content/weeks/YYYY-Www.md`。
-- 后续每日运行在生成项目内容前先读取该周计划。
+- 后续每日运行在通过 `media-operator` 填写平台草稿前先读取该周计划。
 
 ## 仓库结构
 

@@ -1,6 +1,6 @@
 ---
 name: opennomos-task-ops
-description: Coordinate OpenNomos project-task workflows end to end. Use when the user wants to discover live OpenNomos tasks, classify them into full-auto or human-in-the-loop buckets, prepare content packages, stage social publishing flows through `media-operator`, execute browser flows, and validate completion through event stream data.
+description: Coordinate OpenNomos project-task workflows end to end. Use when the user wants to discover live OpenNomos tasks, classify them into full-auto or human-in-the-loop buckets, stage social publishing flows through `media-operator`, execute browser flows, and validate completion through event stream data.
 ---
 
 # OpenNomos Task Ops
@@ -56,8 +56,8 @@ If the user already has a logged-in browser session, prefer using that over logg
 
 For recurring `C` tasks, treat the repo-root `.env` as the operator-managed default content config, with shell environment values overriding `.env` and direct user instructions overriding both.
 For recurring daily `C` tasks inside this repo, use a two-layer planning model:
-- on Mondays, create or refresh `artifacts/content/weeks/YYYY-Www.md` before the daily content package pass
-- on other days, read the current week's plan first and generate today's packages against that plan unless live tasks or operator instructions require a change
+- on Mondays, create or refresh `artifacts/content/weeks/YYYY-Www.md` before the daily draft staging pass
+- on other days, read the current week's plan first and stage today's platform drafts through `media-operator` unless live tasks or operator instructions require a change
 
 ## Workflow
 
@@ -88,7 +88,7 @@ Put each task into one bucket:
   - Automation can reach the checkpoint, but the user must complete one step
   - Examples: captcha, email code, wallet signature, 2FA
 - `C: agent stages publish, user confirms final post`
-  - The agent prepares the content package, uses `media-operator` to fill the target platform, and stops at a draft or final human checkpoint
+  - The agent uses `media-operator` to fill the target platform draft and stops at draft saved or the final human checkpoint
   - Examples: X, Xiaohongshu, Discord, Telegram, form-based proof that still needs a human-owned session or final click
 - `D: user-owned surface`
   - The user controls the asset; the agent provides process support
@@ -119,23 +119,20 @@ For `B` tasks:
 For `C` tasks:
 - Treat publishable social/content tasks as `media-operator` work by default, not as markdown-only handoff
 - Do not auto-publish from the user's social account; `media-operator` must stop at draft saved or the last true human checkpoint
-- Produce a content package using the format in [templates.md](references/templates.md)
 - Read target platforms from `OPENNOMOS_CONTENT_PLATFORMS` when it is set; otherwise use the platforms explicitly requested by the user or implied by the task
-- Treat `OPENNOMOS_CONTENT_PLATFORMS` as a comma-separated list of platform ids that become draft filenames under `artifacts/content/YYYY-MM-DD/<project>/<platform>.md`
+- Treat `OPENNOMOS_CONTENT_PLATFORMS` as a comma-separated list of platform ids that should be staged through `media-operator`
 - Resolve per-platform settings from `OPENNOMOS_CONTENT_PLATFORM_<PLATFORM_KEY>_*`, where `<PLATFORM_KEY>` is the uppercased platform id such as `X`, `WECHAT`, or `XIAOHONGSHU`
-- Save reusable markdown content packages under `artifacts/content/YYYY-MM-DD/<project>/` when working inside this repo
-- Also create or refresh `artifacts/content/YYYY-MM-DD/<project>/queue.md` inside each project folder
+- Do not create standalone markdown drafting artifacts; compose the platform-ready content as working text for the target editor
 - If working inside this repo and today is Monday, also create or refresh the current week's planning artifact at `artifacts/content/weeks/YYYY-Www.md`
 - If the current week's planning artifact exists, use it to vary daily angles and avoid rewriting the same content shape every day
 - Optimize for real, credible content instead of task spam
 - Respect per-platform constraints such as language, character limit, fixed URL length, image requirement, and image count
-- If a platform requires images, include image guidance or a shot list in the package; do not claim the images already exist unless they were actually produced
-- If the operator configured multiple platforms, treat those packages as reusable publishing assets, not as proof that the user has completed multiple public-posting tasks
-- Treat the queue file as the handoff surface for later project-side reporting: default entries to `pending_submit`, let the operator fill public links and short English descriptions, and when asked to submit, use the current day's queue files and only act on entries whose `Public URL` is non-empty
-- Treat package creation as an intermediate artifact for publishable tasks. After the package is ready, immediately load the `media-operator` skill (`skills/media-operator/SKILL.md`) and follow its workflow to fill the content into the target platform and save as draft
-- Use the content package as the source material that `media-operator` pastes into the target platform, while preserving platform-specific hooks, tags, links, and image notes
+- If a platform requires images, prepare or request the required images before staging; do not claim the images already exist unless they were actually produced
+- If the operator configured multiple platforms, treat each staged platform draft as a separate human checkpoint, not as proof that the user has completed multiple public-posting tasks
+- For later project-side reporting, create or refresh `artifacts/content/YYYY-MM-DD/<project>/queue.md` only as a submission tracker: default entries to `pending_submit`, let the operator fill public links and short English descriptions, and when asked to submit, use the current day's queue files and only act on entries whose `Public URL` is non-empty
+- Load the `media-operator` skill (`skills/media-operator/SKILL.md`) before staging content, follow its workflow, and fill the target platform draft while preserving platform-specific hooks, tags, links, and media requirements
 - Follow the `media-operator` operating model: attach to the user's own logged-in browser session when possible, verify remote debugging first, and only fall back to a separate browser profile if the user explicitly approves it
-- If the required browser hand-off is unavailable, stop at that checkpoint and mark the task as blocked rather than silently downgrading it to "markdown prepared"
+- If the required browser hand-off is unavailable, stop at that checkpoint and mark the task as blocked rather than silently downgrading it to a markdown handoff
 
 For `D` tasks:
 - Produce an SOP, proof checklist, and validation plan
@@ -180,15 +177,15 @@ When planning:
 - show the human checkpoints
 - show the evidence needed
 
-When preparing content:
-- provide one main version and two alternates
+When staging content:
+- use one final platform-ready draft; create alternatives only if the operator asks
 - include tags, hooks, and proof text if needed
 - tune tone to the platform instead of reusing one generic draft
 - surface the platform constraints used, especially language, character limit, and image requirements
 - if working in this repo and preparing the week's Monday pass, write a weekly outline first under `artifacts/content/weeks/YYYY-Www.md`
-- if working in this repo, prefer writing the package to `artifacts/content/YYYY-MM-DD/<project>/` instead of leaving it only in chat
-- if working in this repo, also prepare the project-local `queue.md` file with placeholder entries for later submission reporting
-- for publishable social tasks, treat the package as the input to `media-operator`, then report whether the draft was staged successfully or which human checkpoint blocked it
+- do not create standalone markdown drafting artifacts
+- if working in this repo and later submission reporting is expected, prepare the project-local `queue.md` file with placeholder entries
+- for publishable social tasks, report whether `media-operator` staged the platform draft successfully or which human checkpoint blocked it
 
 When validating:
 - show exact dates or timestamps when relevant
